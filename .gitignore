@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+
+# testing
+coverage
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# misc
+.DS_Store
+*.pem
+*.log
+git_status.txt
+
+# env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# appwrite
+appwrite/data/
+appwrite/db/
+appwrite/functions/*/node_modules
+appwrite/functions/*/.env

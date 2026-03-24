@@ -1,0 +1,69 @@
+# Unified Docker Compose for Appwrite and Frontend
+# This file includes the Appwrite setup and adds the Frontend service.
+
+include:
+  - appwrite/docker-compose.yml
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    networks:
+      - appwrite
+    depends_on:
+      - appwrite
+    labels:
+      - "traefik.enable=true"
+      - "traefik.constraint-label-stack=appwrite"
+      - "traefik.docker.network=appwrite"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      # Frontend Router
+      - "traefik.http.routers.frontend.entrypoints=appwrite_web"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.priority=1000"
+      # Secure Frontend Router
+      - "traefik.http.routers.frontend-secure.entrypoints=appwrite_websecure"
+      - "traefik.http.routers.frontend-secure.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend-secure.tls=true"
+      - "traefik.http.routers.frontend-secure.priority=1000"
+
+# We override the appwrite service to give it higher priority for its specific paths
+# This ensures that /v1 and /console go to Appwrite, while everything else goes to the frontend.
+  appwrite:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.constraint-label-stack=appwrite"
+      - "traefik.docker.network=appwrite"
+      - "traefik.http.services.appwrite_api.loadbalancer.server.port=80"
+      - "traefik.http.routers.appwrite_api_http.rule=PathPrefix(`/v1`)"
+      - "traefik.http.routers.appwrite_api_http.priority=2000"
+      - "traefik.http.routers.appwrite_api_http.entrypoints=appwrite_web"
+      - "traefik.http.routers.appwrite_api_https.rule=PathPrefix(`/v1`)"
+      - "traefik.http.routers.appwrite_api_https.priority=2000"
+      - "traefik.http.routers.appwrite_api_https.entrypoints=appwrite_websecure"
+      - "traefik.http.routers.appwrite_api_https.tls=true"
+
+  appwrite-console:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.constraint-label-stack=appwrite"
+      - "traefik.docker.network=appwrite"
+      - "traefik.http.services.appwrite_console.loadbalancer.server.port=80"
+      - "traefik.http.routers.appwrite_console_http.rule=PathPrefix(`/console`)"
+      - "traefik.http.routers.appwrite_console_http.priority=2000"
+      - "traefik.http.routers.appwrite_console_http.entrypoints=appwrite_web"
+      - "traefik.http.routers.appwrite_console_https.rule=PathPrefix(`/console`)"
+      - "traefik.http.routers.appwrite_console_https.priority=2000"
+      - "traefik.http.routers.appwrite_console_https.entrypoints=appwrite_websecure"
+      - "traefik.http.routers.appwrite_console_https.tls=true"
+
+networks:
+  appwrite:
+    external: true
+  gateway:
+    external: true
+  runtimes:
+    external: true

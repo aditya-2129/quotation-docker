@@ -123,16 +123,16 @@ export const MaterialsManager: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <Card className="overflow-x-auto">
-          <table className="w-full text-left font-mono text-sm">
-            <thead className="border-b border-zinc-100 dark:border-zinc-900 bg-zinc-50 dark:bg-zinc-900">
-              <tr>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter">Name</th>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter">Grade</th>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter">Shape</th>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter">Density (g/cm³)</th>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter">Base Rate (₹/kg)</th>
-                <th className="px-4 py-3 font-bold text-zinc-400 uppercase tracking-tighter w-24">Actions</th>
+        <Card variant="glass" className="overflow-hidden border-none shadow-premium">
+          <table className="w-full text-left font-sans text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30">
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Material Identity</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Grade Spec</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Geometry</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Density (g/cm³)</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Base Rate (₹/kg)</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 w-28 text-center">Operations</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
@@ -146,29 +146,29 @@ export const MaterialsManager: React.FC = () => {
                 </tr>
               ) : (
                 materials.map((m) => (
-                  <tr key={m.$id} className="hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors">
-                    <td className="px-4 py-3 text-black dark:text-zinc-200 font-bold">{m.name}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{m.grade || "-"}</td>
-                    <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 border border-zinc-200 dark:border-zinc-800 rounded uppercase text-[10px] bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                  <tr key={m.$id} className="group hover:bg-zinc-50/50 dark:hover:bg-zinc-900/40 transition-all duration-300">
+                    <td className="px-6 py-4 text-zinc-900 dark:text-zinc-50 font-black uppercase tracking-tight text-[11px]">{m.name}</td>
+                    <td className="px-6 py-4 text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{m.grade || "N/A"}</td>
+                    <td className="px-6 py-4">
+                      <span className="px-2 py-0.5 rounded-full font-black text-[9px] uppercase tracking-widest bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border border-zinc-200/50 dark:border-zinc-700/50">
                         {m.shape.replace("_", " ")}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">{m.density.toFixed(4)}</td>
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400 font-bold">₹{m.base_rate}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
+                    <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400 font-mono text-xs">{m.density.toFixed(4)}</td>
+                    <td className="px-6 py-4 text-zinc-900 dark:text-zinc-50 font-black text-xs">₹{m.base_rate}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleOpenModal(m)}
-                          className="p-1 hover:text-black dark:hover:text-white text-zinc-400 transition-colors"
+                          className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400 hover:text-black dark:hover:text-white transition-all shadow-sm border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
                         </button>
                         <button 
                           onClick={() => handleDelete(m.$id)}
-                          className="p-1 hover:text-red-600/80 text-zinc-400 transition-colors"
+                          className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-rose-50 dark:hover:bg-rose-950/20 text-zinc-400 hover:text-rose-600 transition-all shadow-sm border border-transparent hover:border-rose-100 dark:hover:border-rose-900"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </button>
                       </div>
                     </td>

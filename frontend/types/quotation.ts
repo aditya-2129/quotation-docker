@@ -88,6 +88,37 @@ export interface QuotationItem {
   quantity: number;
   allowance: number;
   total: number;
+  labor_processes: {
+    id: string;
+    name: string;
+    cost_per_hr: number;
+    hours: number;
+    total: number;
+  }[];
+  tooling_processes?: {
+    id: string;
+    name: string;
+    cost: number;
+    total: number;
+    unit: string;
+  }[];
+  tooling_material?: {
+    tool_components: number;
+    pattern_casting: number;
+    heat_treat: number;
+    material_cost: number;
+    finish_weight: number;
+    other: number;
+  };
+  tech_specs?: {
+    blank_weight: number;
+    die_size: string;
+    stations: number;
+    shut_height: number;
+    num_fixtures: number;
+    num_rotations: number;
+    num_clamps: number;
+  };
 }
 
 export enum QuotationStatus {

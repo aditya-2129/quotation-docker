@@ -17,14 +17,17 @@ interface QuotationDetailProps {
 export const QuotationDetail: React.FC<QuotationDetailProps> = ({ quotation }) => {
   const laborTotal = quotation.labor_processes?.reduce((sum, p) => sum + (p.total || 0), 0) || 0;
   
-  // Tooling subtotal (calculated from material fields)
-  const toolingTotal = quotation.tooling_material ? (
-    (Number(quotation.tooling_material.material_cost) || 0) + 
-    (Number(quotation.tooling_material.tool_components) || 0) +
-    (Number(quotation.tooling_material.pattern_casting) || 0) +
-    (Number(quotation.tooling_material.heat_treat) || 0) +
-    (Number(quotation.tooling_material.other) || 0)
-  ) : 0;
+  // Tooling subtotal (aggregated from each item)
+  const toolingTotal = quotation.items?.reduce((sum, item) => {
+    const tm = item.tooling_material;
+    if (!tm) return sum;
+    return sum + 
+           (Number(tm.material_cost) || 0) + 
+           (Number(tm.tool_components) || 0) +
+           (Number(tm.pattern_casting) || 0) +
+           (Number(tm.heat_treat) || 0) +
+           (Number(tm.other) || 0);
+  }, 0) || 0;
 
   const bomTotal = quotation.items?.reduce((sum, i) => sum + (i.total || 0), 0) || 0;
   
@@ -80,10 +83,10 @@ export const QuotationDetail: React.FC<QuotationDetailProps> = ({ quotation }) =
               <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Part Identification</label>
               <p className="text-sm font-black uppercase tracking-tight underline decoration-zinc-100 underline-offset-4 decoration-2">{quotation.part_number}</p>
            </div>
-           <div className="space-y-1">
-              <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Die Analysis</label>
-              <p className="text-sm font-black uppercase tracking-tight">{quotation.tech_specs?.die_size || "Standard"}</p>
-           </div>
+            <div className="space-y-1">
+               <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Primary Die Size</label>
+               <p className="text-sm font-black uppercase tracking-tight">{quotation.items?.[0]?.tech_specs?.die_size || "N/A"}</p>
+            </div>
            <div className="space-y-1">
               <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Settlement Registry</label>
               <p className="text-sm font-black uppercase tracking-tight">{quotation.currency} / {quotation.currency === "INR" ? "₹" : "$"}</p>
@@ -164,22 +167,28 @@ export const QuotationDetail: React.FC<QuotationDetailProps> = ({ quotation }) =
            <div className="max-w-sm space-y-4">
               <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-black dark:text-white border-b-2 border-black dark:border-zinc-800 pb-2">Technical Footprint</h5>
               <div className="grid grid-cols-2 gap-y-4 gap-x-12 text-[10px] font-bold uppercase tracking-tight italic text-zinc-500">
-                 <div>
-                    <span>Shut Height:</span>
-                    <span className="text-black dark:text-zinc-100 ml-2">{quotation.tech_specs?.shut_height || "0"} MM</span>
-                 </div>
-                 <div>
-                    <span>Blank WT:</span>
-                    <span className="text-black dark:text-zinc-100 ml-2">{quotation.tech_specs?.blank_weight || "0"} KG</span>
-                 </div>
-                 <div>
-                    <span>Clamping pts:</span>
-                    <span className="text-black dark:text-zinc-100 ml-2">{quotation.tech_specs?.num_clamps || "0"} UNIT</span>
-                 </div>
-                 <div>
-                    <span>Stations:</span>
-                    <span className="text-black dark:text-zinc-100 ml-2">{quotation.tech_specs?.stations || "1"}</span>
-                 </div>
+                  <div>
+                    <span>Primary Shut HT:</span>
+                    <span className="text-black dark:text-zinc-100 ml-2">{quotation.items?.[0]?.tech_specs?.shut_height || "0"} MM</span>
+                  </div>
+                  <div>
+                     <span>Gross Blank WT:</span>
+                     <span className="text-black dark:text-zinc-100 ml-2">
+                       {quotation.items?.reduce((sum, i) => sum + (i.tech_specs?.blank_weight || 0), 0)} KG
+                     </span>
+                  </div>
+                  <div>
+                     <span>Clamping pts:</span>
+                     <span className="text-black dark:text-zinc-100 ml-2">
+                       {quotation.items?.reduce((sum, i) => sum + (i.tech_specs?.num_clamps || 0), 0)} UNIT
+                     </span>
+                  </div>
+                  <div>
+                     <span>Total Stations:</span>
+                     <span className="text-black dark:text-zinc-100 ml-2">
+                        {quotation.items?.reduce((sum, i) => sum + (i.tech_specs?.stations || 0), 0)}
+                     </span>
+                  </div>
               </div>
            </div>
 

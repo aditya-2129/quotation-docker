@@ -50,23 +50,6 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
     
     // New Detailed Fields
     labor_processes: [] as any[],
-    tooling_material: {
-      tool_components: 0,
-      pattern_casting: 0,
-      heat_treat: 0,
-      material_cost: 0,
-      finish_weight: 0,
-      other: 0,
-    },
-    tech_specs: {
-      blank_weight: 0,
-      die_size: "",
-      stations: 0,
-      shut_height: 0,
-      num_fixtures: 0,
-      num_rotations: 0,
-      num_clamps: 0,
-    },
     additional_charges: {
       texture_coatings: 0,
       transportation: 0,
@@ -108,11 +91,30 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
     setFormData((prev: any) => ({ ...prev, items }));
   };
 
-  // RECALCULATE GRAND TOTAL whenever any cost field changes
   useEffect(() => {
     const bomTotal = formData.items.reduce((sum: number, item: any) => sum + item.total, 0);
-    const laborTotal = formData.labor_processes.reduce((sum: number, p: any) => sum + (p.total || 0), 0);
-    const toolingTotal = Object.values(formData.tooling_material).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
+    
+    // Aggregate costs from each item
+    let laborTotal = 0;
+    let toolingTotal = 0;
+
+    formData.items.forEach((item: any) => {
+      // 1. Sum labor costs for this part
+      laborTotal += (item.labor_processes || []).reduce((pSum: number, p: any) => pSum + (p.total || 0), 0);
+      
+      // 2. Sum tooling costs for this part
+      if (item.tooling_material) {
+        toolingTotal += (Number(item.tooling_material.tool_components) || 0) +
+                        (Number(item.tooling_material.pattern_casting) || 0) +
+                        (Number(item.tooling_material.heat_treat) || 0) +
+                        (Number(item.tooling_material.material_cost) || 0) +
+                        (Number(item.tooling_material.other) || 0);
+      }
+    });
+    
+    // Original global labor/tooling fallback (keeping for compatibility with old records if any)
+    const globalLaborTotal = (formData.labor_processes || []).reduce((sum: number, p: any) => sum + (p.total || 0), 0);
+    laborTotal += globalLaborTotal;
     
     // Base cost before Overhead and Profit
     const baseSubtotal = bomTotal + laborTotal + toolingTotal + (Number(formData.additional_charges.texture_coatings) || 0) + (Number(formData.additional_charges.transportation) || 0);
@@ -135,7 +137,7 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
     const grandTotal = subtotalAfterDiscount + taxAmount;
     
     setFormData((prev: any) => ({ ...prev, total_amount: grandTotal }));
-  }, [formData.items, formData.labor_processes, formData.tooling_material, formData.additional_charges]);
+  }, [formData.items, formData.labor_processes, formData.additional_charges]);
 
   const handleFinalSubmit = async () => {
     try {
@@ -159,7 +161,7 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
   };
 
   const nextStep = () => {
-    if (currentStep === 7) {
+    if (currentStep === 6) {
       handleFinalSubmit();
     } else {
       setCurrentStep(prev => prev + 1);
@@ -188,8 +190,7 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
           { label: "General" },
           { label: "Materials" },
           { label: "Items (BOM)" },
-          { label: "Operations" },
-          { label: "Tooling" },
+          { label: "Engineering" },
           { label: "Overhead" },
           { label: "Review" }
         ]}
@@ -221,33 +222,19 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
 
         {currentStep === 4 && (
           <LaborStep 
+            items={formData.items}
             laborProcesses={formData.labor_processes}
-            toolingMaterial={formData.tooling_material}
-            techSpecs={formData.tech_specs}
             additionalCharges={formData.additional_charges}
             totalAmount={formData.total_amount}
             onChange={(field, value) => setFormData((prev: any) => ({ ...prev, [field]: value }))}
-            mode="operations"
+            mode="engineering"
           />
         )}
 
         {currentStep === 5 && (
           <LaborStep 
+            items={formData.items}
             laborProcesses={formData.labor_processes}
-            toolingMaterial={formData.tooling_material}
-            techSpecs={formData.tech_specs}
-            additionalCharges={formData.additional_charges}
-            totalAmount={formData.total_amount}
-            onChange={(field, value) => setFormData((prev: any) => ({ ...prev, [field]: value }))}
-            mode="tooling"
-          />
-        )}
-
-        {currentStep === 6 && (
-          <LaborStep 
-            laborProcesses={formData.labor_processes}
-            toolingMaterial={formData.tooling_material}
-            techSpecs={formData.tech_specs}
             additionalCharges={formData.additional_charges}
             totalAmount={formData.total_amount}
             onChange={(field, value) => setFormData((prev: any) => ({ ...prev, [field]: value }))}
@@ -255,7 +242,7 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
           />
         )}
 
-        {currentStep === 7 && (
+        {currentStep === 6 && (
           <ReviewStep 
             formData={formData}
           />
@@ -284,10 +271,9 @@ export const QuotationForm: React.FC<QuotationFormProps> = ({ initialData }) => 
           >
             {currentStep === 1 ? "Pick Materials" : 
              currentStep === 2 ? "Add Items (BOM)" : 
-             currentStep === 3 ? "Process Breakdown" : 
-             currentStep === 4 ? "Tooling & Tech" : 
-             currentStep === 5 ? "Logistics & Margin" :
-             currentStep === 6 ? "Review Summary" : "Generate Quote"} →
+             currentStep === 3 ? "Process & Engineering" : 
+             currentStep === 4 ? "Logistics & Margin" : 
+             currentStep === 5 ? "Review Summary" : "Generate Quote"} →
           </Button>
         </div>
       </div>

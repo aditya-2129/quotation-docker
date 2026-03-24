@@ -34,6 +34,24 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
     quantity: 1,
     allowance: 0,
     total: 0,
+    labor_processes: [],
+    tooling_material: {
+      tool_components: 0,
+      pattern_casting: 0,
+      heat_treat: 0,
+      material_cost: 0,
+      finish_weight: 0,
+      other: 0,
+    },
+    tech_specs: {
+      blank_weight: 0,
+      die_size: "",
+      stations: 1,
+      shut_height: 0,
+      num_fixtures: 0,
+      num_rotations: 0,
+      num_clamps: 0,
+    },
   });
 
   useEffect(() => {
@@ -109,7 +127,8 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
       return;
     }
 
-    onChange([...items, { ...newItem, id: Math.random().toString(36).substr(2, 9) } as QuotationItem]);
+
+    onChange([...items, { ...newItem, id: Math.random().toString(36).substr(2, 9), labor_processes: [] } as QuotationItem]);
     setIsAddingItem(false);
     setErrors({});
     // Reset
@@ -123,6 +142,24 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
       quantity: 1,
       allowance: 0,
       total: 0,
+      labor_processes: [],
+      tooling_material: {
+        tool_components: 0,
+        pattern_casting: 0,
+        heat_treat: 0,
+        material_cost: 0,
+        finish_weight: 0,
+        other: 0,
+      },
+      tech_specs: {
+        blank_weight: 0,
+        die_size: "",
+        stations: 1,
+        shut_height: 0,
+        num_fixtures: 0,
+        num_rotations: 0,
+        num_clamps: 0,
+      },
     });
   };
 
@@ -143,20 +180,25 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
       </div>
 
       {isAddingItem && (
-        <Card className="p-3 border-2 border-black dark:border-white shadow-2xl space-y-4">
-          <div className="flex items-center justify-between border-b pb-3 mb-1">
-            <h4 className="font-black uppercase tracking-[0.2em] text-[10px] text-zinc-500">New Part Entry</h4>
-            <button onClick={() => setIsAddingItem(false)} className="text-zinc-400 hover:text-black transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <Card variant="glass" className="p-0 shadow-premium space-y-0 overflow-hidden">
+          <div className="px-8 py-6 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10">
+            <div>
+              <h4 className="font-black uppercase tracking-[0.2em] text-[10px] text-zinc-500">New Part Configuration</h4>
+              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">Parameters & Dimensional Calculation</p>
+            </div>
+            <button onClick={() => setIsAddingItem(false)} className="h-8 w-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>
+
+          <div className="px-8 py-8">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <Input 
                 label="Part name" 
                 placeholder="e.g., BRACKET-01" 
-                value={newItem.part_name}
+                value={newItem.part_name || ""}
                 error={errors.part_name}
                 onChange={e => {
                   setNewItem({...newItem, part_name: e.target.value});
@@ -187,7 +229,7 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
                    <Input 
                      type="number"
                      placeholder="Rate"
-                     value={newItem.rate}
+                     value={newItem.rate || 0}
                      onChange={e => setNewItem({...newItem, rate: Number(e.target.value)})}
                      className="h-9 rounded-xl border-2 font-bold text-xs"
                    />
@@ -198,7 +240,7 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
                    <Input 
                      type="number"
                      placeholder="No."
-                     value={newItem.quantity}
+                     value={newItem.quantity || 0}
                      onChange={e => setNewItem({...newItem, quantity: Number(e.target.value)})}
                      className="h-9 rounded-xl border-2 font-bold text-xs"
                    />
@@ -209,16 +251,16 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
                    <Input 
                      type="number"
                      placeholder="+mm"
-                     value={newItem.allowance}
+                     value={newItem.allowance || 0}
                      onChange={e => setNewItem({...newItem, allowance: Number(e.target.value)})}
                      className="h-9 rounded-xl border-2 font-bold text-xs text-blue-600 bg-blue-50/10"
                    />
                 </div>
               </div>
 
-              <div className="space-y-2 pt-1">
-                <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Section Type</label>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Section Geometry</label>
+                <div className="grid grid-cols-2 gap-3">
                   {[
                     { id: MaterialShape.ROUND_BAR, label: "Round Bar", icon: "M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z" },
                     { id: MaterialShape.SQUARE_BAR, label: "Square Bar", icon: "M3 3h18v18H3z" },
@@ -228,14 +270,14 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
                     <button
                       key={s.id}
                       onClick={() => setNewItem({...newItem, shape: s.id as any})}
-                      className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-all group ${
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all duration-300 ${
                         newItem.shape === s.id 
-                          ? "bg-zinc-900 border-zinc-900 text-white shadow-md dark:bg-white dark:text-black font-black" 
-                          : "bg-white border-zinc-50 text-zinc-400 hover:border-zinc-200 dark:bg-zinc-950 dark:border-zinc-900"
+                          ? "bg-zinc-900 border-zinc-900 text-white shadow-lg dark:bg-white dark:text-black font-black" 
+                          : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-300 dark:bg-zinc-950 dark:border-zinc-900"
                       }`}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d={s.icon}/></svg>
-                      <span className="text-[8px] font-bold uppercase tracking-tight">{s.label}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d={s.icon}/></svg>
+                      <span className="text-[9px] font-bold uppercase tracking-tight">{s.label}</span>
                     </button>
                   ))}
                 </div>
@@ -255,14 +297,14 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
                       <Input 
                         label={newItem.shape === MaterialShape.ROUND_BAR ? "Ø" : "AF"} 
                         type="number"
-                        value={newItem.dimensions?.diameter}
+                        value={newItem.dimensions?.diameter || 0}
                         onChange={e => setNewItem({...newItem, dimensions: {...newItem.dimensions!, diameter: Number(e.target.value)}})}
                         className="h-8 rounded-lg border text-[11px]"
                       />
                       <Input 
                         label="L" 
                         type="number"
-                        value={newItem.dimensions?.length}
+                        value={newItem.dimensions?.length || 0}
                         onChange={e => setNewItem({...newItem, dimensions: {...newItem.dimensions!, length: Number(e.target.value)}})}
                         className="h-8 rounded-lg border text-[11px]"
                       />
@@ -309,17 +351,18 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t mt-1">
-            <Button variant="ghost" className="h-9 px-4 text-[11px] font-bold" onClick={() => setIsAddingItem(false)}>Cancel</Button>
-            <Button variant="primary" className="h-9 px-6 text-[11px] font-black uppercase tracking-widest shadow-lg" onClick={handleAddItem}>Confirm & Add</Button>
+        <div className="flex justify-end gap-3 pt-8 border-t border-zinc-100 dark:border-zinc-800">
+            <Button variant="ghost" className="h-11 px-6 text-xs font-bold rounded-xl" onClick={() => setIsAddingItem(false)}>Discard</Button>
+            <Button variant="primary" className="h-11 px-8 text-xs font-black uppercase tracking-[0.15em] shadow-premium rounded-xl" onClick={handleAddItem}>Add to Bill of Materials</Button>
           </div>
         </Card>
       )}
 
       {/* ITEMS LIST TABLE */}
-      <Card className="overflow-hidden border-2 border-zinc-100 dark:border-zinc-900 rounded-3xl">
-        <table className="w-full text-left font-sans border-collapse">
+      <Card variant="glass" className="overflow-hidden p-0 shadow-premium">
+        <table className="w-full text-left font-sans text-sm border-collapse">
           <thead className="bg-zinc-50 dark:bg-zinc-950 border-b-2 border-zinc-100 dark:border-zinc-900">
             <tr>
               <th className="px-4 py-2 text-[8px] font-black uppercase tracking-[0.2em] text-zinc-400">BOM Part Details</th>
@@ -388,13 +431,13 @@ export const BOMStep: React.FC<BOMStepProps> = ({ selectedMaterialIds, items, on
             )}
           </tbody>
           {items.length > 0 && (
-            <tfoot className="bg-zinc-900 text-white">
+            <tfoot className="bg-zinc-50 dark:bg-zinc-950/80 border-t border-zinc-100 dark:border-zinc-800">
               <tr>
                 <td colSpan={4} className="px-4 py-3 text-right">
-                   <span className="uppercase tracking-[0.4em] font-black text-[8px] text-zinc-400">BOM Subtotal</span>
+                   <span className="uppercase tracking-[0.4em] font-black text-[10px] text-zinc-400">Total Material Cost</span>
                 </td>
                 <td className="px-4 py-3 text-right">
-                   <div className="text-lg font-black tracking-tighter">
+                   <div className="text-xl font-black tracking-tighter text-zinc-900 dark:text-white">
                       ₹{items.reduce((sum, i) => sum + i.total, 0).toLocaleString()}
                    </div>
                 </td>
